@@ -39,7 +39,7 @@ export class BigBankersStack extends cdk.Stack {
         runtime: lambda.Runtime.NODEJS_16_X,
         handler: "index.paymentConfirmation",
         code: lambda.Code.fromAsset(
-          path.join(__dirname, "payment-confirmation/output")
+          path.join(__dirname, "payment-confirmation")
         ),
         onSuccess: new destinations.SnsDestination(topic),
         environment: {
