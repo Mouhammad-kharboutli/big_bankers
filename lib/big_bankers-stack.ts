@@ -15,11 +15,11 @@ export class BigBankersStack extends cdk.Stack {
     // 👇 get access to the secret object
     const stripeKeySecret = secretsmanager.Secret.fromSecretNameV2(
       this,
-      'payment/stripeApiKey',
       'stripe_api_key',
+      'payment/stripeApiKey',
     );
 
-    const stripe_api_key = stripeKeySecret.secretValue.toString();
+    const stripe_api_key = stripeKeySecret.secretValue.unsafeUnwrap();
 
     // The code that defines your stack goes here
     const fn = new lambda.Function(this, "payment-confirmation", {
