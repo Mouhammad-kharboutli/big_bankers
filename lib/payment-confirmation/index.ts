@@ -7,16 +7,23 @@ export const paymentConfirmation = async (event: any) => {
       typescript: true,
     });
 
-    const charge = await stripe.charges.capture(event.token);
+    const charge = await stripe.charges.capture(event.chargeToken);
 
     const result = {
-      bookingId: "",
-      amount: "",
-      userId: "",
+      bookingId: event.bookingId,
+      amount: charge.amount,
+      userId: event.userId,
+      status: 200
     };
 
-    return { statusCode: 200, body: JSON.stringify(result) };
-  } catch (error) {
-    return { statusCode: 500, body: JSON.stringify(error) };
+    return result;
+
+  } catch (error:any) {
+    return {
+      bookingId: event.bookingId,
+      statusMessage: error.message,
+      userId: event.userId,
+      status: error.code
+    };
   }
 };
