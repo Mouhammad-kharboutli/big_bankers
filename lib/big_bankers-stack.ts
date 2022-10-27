@@ -15,8 +15,8 @@ export class BigBankersStack extends cdk.Stack {
     // retrieve stripe api key from secret manager
     const stripeKeySecret = secretsmanager.Secret.fromSecretNameV2(
       this,
-      "payment/stripeApiKey",
-      "stripe_api_key"
+      "stripe_api_key",
+      "payment/stripeApiKey"
     );
 
     const stripe_api_key = stripeKeySecret.secretValue.unsafeUnwrap();
