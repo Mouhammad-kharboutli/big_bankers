@@ -1,7 +1,13 @@
 import Stripe from "stripe";
 
+interface Event {
+  bookingId: string;
+  chargeToken: any;
+  userId: string;
+  price: number;
+}
 
-export const paymentConfirmation = async (event: any) => {
+export const paymentConfirmation = async (event: Event) => {
   try {
     const stripe = new Stripe(process.env.stripe_api_key as string, {
       apiVersion: "2022-08-01",
