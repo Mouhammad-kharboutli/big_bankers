@@ -4,12 +4,6 @@ import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apiGateway from "aws-cdk-lib/aws-apigateway";
 
-// Load the AWS SDK
-var AWS = require('aws-sdk'),
-    region = "eu-west-1",
-    secretName = "stripe_api_key",
-    secret,
-    decodedBinarySecret;
 
 import path from "path";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
