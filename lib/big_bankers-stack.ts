@@ -2,6 +2,9 @@ import * as cdk from "aws-cdk-lib";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as destinations from "aws-cdk-lib/aws-lambda-destinations";
+import * as sns from "aws-cdk-lib/aws-sns";
+
 import * as apiGateway from "aws-cdk-lib/aws-apigateway";
 
 import path from "path";
@@ -20,6 +23,12 @@ export class BigBankersStack extends cdk.Stack {
 
     const stripe_api_key = stripeKeySecret.secretValue.unsafeUnwrap();
 
+    const topic = sns.Topic.fromTopicArn(
+      this,
+      "booking_payment",
+      "arn:aws:sns:eu-west-1:172873359886:booking_payment"
+    );
+
     // The code that defines your stack goes here
     const fn = new lambda.Function(this, "payment-confirmation", {
       runtime: lambda.Runtime.NODEJS_16_X,
@@ -27,6 +36,7 @@ export class BigBankersStack extends cdk.Stack {
       code: lambda.Code.fromAsset(
         path.join(__dirname, "payment-confirmation/output")
       ),
+      onSuccess: new destinations.SnsDestination(topic),
       environment: {
         STRIPE_API_KEY: stripe_api_key,
       },
