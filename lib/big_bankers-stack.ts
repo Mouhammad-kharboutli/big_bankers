@@ -1,5 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as destinations from "aws-cdk-lib/aws-lambda-destinations";
@@ -14,11 +16,11 @@ export class BigBankersStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // 👇 get access to the secret object
+    // retrieve stripe api key from secret manager
     const stripeKeySecret = secretsmanager.Secret.fromSecretNameV2(
       this,
-      "payment/stripeApiKey",
-      "stripe_api_key"
+      "stripe_api_key",
+      "payment/stripeApiKey"
     );
 
     const stripe_api_key = stripeKeySecret.secretValue.unsafeUnwrap();
@@ -29,22 +31,32 @@ export class BigBankersStack extends cdk.Stack {
       "arn:aws:sns:eu-west-1:172873359886:booking_payment"
     );
 
-    // The code that defines your stack goes here
-    const fn = new lambda.Function(this, "payment-confirmation", {
-      runtime: lambda.Runtime.NODEJS_16_X,
-      handler: "index.paymentConfirmation",
-      code: lambda.Code.fromAsset(
-        path.join(__dirname, "payment-confirmation/output")
-      ),
-      onSuccess: new destinations.SnsDestination(topic),
-      environment: {
-        STRIPE_API_KEY: stripe_api_key,
-      },
-    });
+    // define payment confirmation lambda
+    const paymentConfirmationLambda = new lambda.Function(
+      this,
+      "payment-confirmation",
+      {
+        runtime: lambda.Runtime.NODEJS_16_X,
+        handler: "index.paymentConfirmation",
+        code: lambda.Code.fromAsset(
+          path.join(__dirname, "payment-confirmation/output")
+        ),
+        onSuccess: new destinations.SnsDestination(topic),
+        environment: {
+          STRIPE_API_KEY: stripe_api_key,
+        },
+      }
+    );
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'BigBankersQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    // get existing queue
+    const queue = sqs.Queue.fromQueueArn(
+      this,
+      "booking_confirmed",
+      "arn:aws:sqs:eu-west-1:172873359886:booking_confirmed"
+    );
+
+    const eventSource = new lambdaEventSources.SqsEventSource(queue);
+
+    paymentConfirmationLambda.addEventSource(eventSource);
   }
 }
