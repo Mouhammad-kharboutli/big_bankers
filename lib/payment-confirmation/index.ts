@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 
+
 export const paymentConfirmation = async (event: any) => {
   try {
     const stripe = new Stripe(process.env.stripe_api_key as string, {
@@ -18,7 +19,8 @@ export const paymentConfirmation = async (event: any) => {
 
     return result;
 
-  } catch (error:any) {
+  } catch (error) {
+    
     return {
       bookingId: event.bookingId,
       statusMessage: error.message,
