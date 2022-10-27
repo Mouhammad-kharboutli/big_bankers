@@ -1,9 +1,8 @@
 import * as cdk from "aws-cdk-lib";
-import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apiGateway from "aws-cdk-lib/aws-apigateway";
-
 
 import path from "path";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -15,8 +14,8 @@ export class BigBankersStack extends cdk.Stack {
     // 👇 get access to the secret object
     const stripeKeySecret = secretsmanager.Secret.fromSecretNameV2(
       this,
-      'payment/stripeApiKey',
-      'stripe_api_key',
+      "payment/stripeApiKey",
+      "stripe_api_key"
     );
 
     const stripe_api_key = stripeKeySecret.secretValue.toString();
@@ -25,22 +24,13 @@ export class BigBankersStack extends cdk.Stack {
     const fn = new lambda.Function(this, "payment-confirmation", {
       runtime: lambda.Runtime.NODEJS_16_X,
       handler: "index.paymentConfirmation",
-      code: lambda.Code.fromAsset(path.join(__dirname, "payment-confirmation/output")),
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "payment-confirmation/output")
+      ),
       environment: {
-        "STRIPE_API_KEY": stripe_api_key,
-      }
+        STRIPE_API_KEY: stripe_api_key,
+      },
     });
-
-    // Define GATEWAY API
-    const api = new apiGateway.LambdaRestApi(this, 'payments', {
-      handler: fn,proxy:false
-    });
-
-
-    api.root.addMethod('ANY');
-    
-    const preAuth = api.root.addResource('pre-auth-api');
-    preAuth.addMethod('POST');
 
     // example resource
     // const queue = new sqs.Queue(this, 'BigBankersQueue', {
