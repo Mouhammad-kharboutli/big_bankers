@@ -9,7 +9,7 @@ interface Event {
 
 export const paymentConfirmation = async (event: Event) => {
   try {
-    const stripe = new Stripe(process.env.stripe_api_key as string, {
+    const stripe = new Stripe(process.env.STRIPE_API_KEY as string, {
       apiVersion: "2022-08-01",
       typescript: true,
     });
